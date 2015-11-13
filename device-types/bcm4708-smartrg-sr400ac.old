@@ -1,0 +1,43 @@
+client_type = bootloader
+append_dtb = True
+send_char = False
+
+u_load_addrs =
+    0x00008000
+    0x40000000
+    0x00000000
+
+z_load_addrs =
+    0x00008000
+    0x40000000
+    0x00000000
+
+boot_cmds_ramdisk =
+    ifconfig eth0 -addr=192.168.2.222 -gw=192.168.2.1 -dns=192.168.2.1 -mask=255.255.255.0,
+    load -raw -tftp -addr=0x4000000 -max=0x800000 {SERVER_IP}:{RAMDISK},
+    boot -tftp -raw -addr=0x00008000 -max=0x800000 {SERVER_IP}:{KERNEL}
+
+boot_cmds_nfs =
+    setenv autoload no,
+    setenv initrd_high "'0xffffffff'",
+    setenv fdt_high "'0xffffffff'",
+    setenv kernel_addr_r "'{KERNEL_ADDR}'",
+    setenv initrd_addr_r "'{RAMDISK_ADDR}'",
+    setenv fdt_addr_r "'{DTB_ADDR}'",
+    setenv loadkernel "'tftp ${kernel_addr_r} {KERNEL}'",
+    setenv loadinitrd "'tftp ${initrd_addr_r} {RAMDISK}; setenv initrd_size ${filesize}'",
+    setenv loadfdt "'tftp ${fdt_addr_r} {DTB}'",
+    setenv nfsargs "'setenv bootargs console=ttyS0,115200 console=ttyAT0,115200 earlyprintk root=/dev/nfs rw nfsroot={SERVER_IP}:{NFSROOTFS},tcp,hard,intr ip=dhcp'",
+    setenv bootcmd "'dhcp; setenv serverip {SERVER_IP}; run loadkernel; run loadinitrd; run loadfdt; run nfsargs; {BOOTX}'",
+    boot
+
+bootloader_prompt = CFE>
+interrupt_boot_prompt = Loading:
+interrupt_boot_control_character = c
+boot_cmd_timeout = 30
+
+boot_options =
+    boot_cmds
+
+[boot_cmds]
+default = boot_cmds
