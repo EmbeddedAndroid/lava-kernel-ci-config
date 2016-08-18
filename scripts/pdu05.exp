@@ -1,0 +1,9 @@
+#!/usr/bin/expect -f
+set state [lindex $argv 0]
+set port [lindex $argv 1]
+spawn ssh ubnt@pdu05
+expect "password: "
+send "ubnt\r"
+expect "MF.v2.0.8#"
+send "echo $state > /proc/power/relay$port\r"
+expect "MF.v2.0.8#"
